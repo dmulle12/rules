@@ -84,7 +84,7 @@ GEOSITE_TAGS = (
 
 GFWLIST_TAGS = ("gfw", "gfw-skip")
 
-# Upstream domain-list-community categories merged into the "streaming" tag
+# Upstream domain-list-community categories merged into the "streaming-cn" tag
 # (mainland China streaming / entertainment services, for 回国-style routing).
 STREAMING_TAGS = (
     "netease",
@@ -503,7 +503,7 @@ def _run() -> None:
         ("category-ads-all", "reject", (), BLOCK_DOMAIN_SUFFIX),
         ("geolocation-!cn", "loc-!cn", (), ()),
         ("geolocation-cn", "loc-cn", DIRECT_DOMAIN, DIRECT_DOMAIN_SUFFIX),
-        (STREAMING_TAGS, "streaming", (), ()),
+        (STREAMING_TAGS, "streaming-cn", (), ()),
     )
     upstream_rules = parse_dlc_plain(
         "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat_plain.yml",
