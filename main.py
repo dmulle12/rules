@@ -84,6 +84,21 @@ GEOSITE_TAGS = (
 
 GFWLIST_TAGS = ("gfw", "gfw-skip")
 
+# Upstream domain-list-community categories merged into the "streaming" tag
+# (mainland China streaming / entertainment services, for 回国-style routing).
+STREAMING_TAGS = (
+    "netease",
+    "bilibili",
+    "iqiyi",
+    "youku",
+    "tencent",
+    "douyin",
+    "kuaishou",
+    "ximalaya",
+    "kugou",
+    "kuwo",
+)
+
 
 def parse_dlc_plain(url: str, tags: tuple[str, ...]) -> GeoSiteRules:
     """Extract flattened tags and supplement them with matching global attributes."""
@@ -442,6 +457,36 @@ def clean_domains(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
+def flatten_requested_tags(rule_tags: tuple) -> tuple[str, ...]:
+    """Collect every upstream tag needed, expanding merged (tuple) entries."""
+    return tuple(
+        tag
+        for rule in rule_tags
+        for tag in (rule[0] if isinstance(rule[0], tuple) else (rule[0],))
+    )
+
+
+def merge_tag_rules(
+    upstream_rules: GeoSiteRules,
+    upstream_tags: tuple[str, ...] | str,
+    extra_domains: tuple[str, ...] = (),
+    extra_suffixes: tuple[str, ...] = (),
+) -> DomainResult:
+    """Merge rules from one (or several) upstream tags, plus manual additions."""
+    if isinstance(upstream_tags, str):
+        upstream_tags = (upstream_tags,)
+    domain, domain_suffix, domain_keyword, domain_regex = [], [], [], []
+    for tag in upstream_tags:
+        d, ds, dk, dr = upstream_rules[tag]
+        domain.extend(d)
+        domain_suffix.extend(ds)
+        domain_keyword.extend(dk)
+        domain_regex.extend(dr)
+    domain.extend(extra_domains)
+    domain_suffix.extend(extra_suffixes)
+    return domain, domain_suffix, domain_keyword, domain_regex
+
+
 def main() -> None:
     shutil.rmtree("dist", ignore_errors=True)
     os.makedirs("dist")
@@ -458,21 +503,20 @@ def _run() -> None:
         ("category-ads-all", "reject", (), BLOCK_DOMAIN_SUFFIX),
         ("geolocation-!cn", "loc-!cn", (), ()),
         ("geolocation-cn", "loc-cn", DIRECT_DOMAIN, DIRECT_DOMAIN_SUFFIX),
+        (STREAMING_TAGS, "streaming", (), ()),
     )
     upstream_rules = parse_dlc_plain(
         "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat_plain.yml",
-        tuple(rule[0] for rule in rule_tags),
+        flatten_requested_tags(rule_tags),
     )
 
     geosite_rules: GeoSiteRules = {}
     for upstream_tag, output_tag, extra_domains, extra_suffixes in rule_tags:
-        domain, domain_suffix, domain_keyword, domain_regex = upstream_rules[
-            upstream_tag
-        ]
-        domain.extend(extra_domains)
-        domain_suffix.extend(extra_suffixes)
         geosite_rules[output_tag] = release(
-            domain, domain_suffix, domain_keyword, domain_regex, output_tag
+            *merge_tag_rules(
+                upstream_rules, upstream_tag, extra_domains, extra_suffixes
+            ),
+            output_tag,
         )
 
     gfwlist_rules = parse_gfwlist(
