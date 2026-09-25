@@ -56,6 +56,12 @@ DIRECT_DOMAIN_SUFFIX = (
     "baozicdn.com",
 )
 
+# Manually maintained US school domains (no suitable upstream category).
+US_EDU_DOMAIN_SUFFIX = (
+    "jjc.edu",  # Joliet Junior College
+    "lanecc.edu",  # Lane Community College
+)
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Logging
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -515,7 +521,9 @@ def _run() -> None:
         ("category-ads-all", "reject", (), BLOCK_DOMAIN_SUFFIX),
         ("geolocation-!cn", "loc-!cn", (), ()),
         ("geolocation-cn", "loc-cn", DIRECT_DOMAIN, DIRECT_DOMAIN_SUFFIX),
-        (STREAMING_TAGS, "streaming-cn", (), ()), (MICROSOFT_TAGS, "microsoft", (), ()),
+        (STREAMING_TAGS, "streaming-cn", (), ()),
+        (MICROSOFT_TAGS, "microsoft", (), ()),
+        ((), "us-edu", (), US_EDU_DOMAIN_SUFFIX),
     )
     upstream_rules = parse_dlc_plain(
         "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat_plain.yml",
