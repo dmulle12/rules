@@ -86,6 +86,17 @@ GFWLIST_TAGS = ("gfw", "gfw-skip")
 
 # Upstream domain-list-community categories merged into the "streaming-cn" tag
 # (mainland China streaming / entertainment services, for 回国-style routing).
+
+# Upstream domain-list-community categories merged into the "microsoft" tag
+# (Microsoft services, for routing via US nodes).
+MICROSOFT_TAGS = (
+    "microsoft",
+    "microsoft-dev",
+    "azure",
+    "bing",
+    "onedrive",
+    "xbox",
+)
 STREAMING_TAGS = (
     "netease",
     "bilibili",
@@ -486,6 +497,7 @@ def merge_tag_rules(
     domain_suffix.extend(extra_suffixes)
     return domain, domain_suffix, domain_keyword, domain_regex
 
+        
 
 def main() -> None:
     shutil.rmtree("dist", ignore_errors=True)
@@ -503,7 +515,7 @@ def _run() -> None:
         ("category-ads-all", "reject", (), BLOCK_DOMAIN_SUFFIX),
         ("geolocation-!cn", "loc-!cn", (), ()),
         ("geolocation-cn", "loc-cn", DIRECT_DOMAIN, DIRECT_DOMAIN_SUFFIX),
-        (STREAMING_TAGS, "streaming-cn", (), ()),
+        (STREAMING_TAGS, "streaming-cn", (), ()), (MICROSOFT_TAGS, "microsoft", (), ()),
     )
     upstream_rules = parse_dlc_plain(
         "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat_plain.yml",
