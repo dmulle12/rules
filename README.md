@@ -13,6 +13,7 @@
 > - `loc-!cn`: Domains outside mainland China
 > - `loc-cn`: Direct-connection rules for mainland China, combining `geolocation-cn`, rules with the `@cn` attribute from all lists, and manually maintained direct-connection rules
 > - `streaming-cn`: Mainland China streaming and entertainment services (NetEase Cloud Music, Bilibili, iQIYI, Youku, Tencent Video, Douyin, Kuaishou, Ximalaya, Kugou, Kuwo), intended for 回国-style routing
+> - `microsoft`: Microsoft services (Microsoft 365/Office, Outlook, OneDrive, Xbox, Azure, Bing), intended for routing via US nodes
 
 > The upstream `domain-list-community` file already includes rule expansion, attribute filtering, and deduplication.
 
