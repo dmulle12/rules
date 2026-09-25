@@ -8,7 +8,7 @@ from unittest.mock import patch
 import yaml
 
 from main import (
-    STREAMING_TAGS,
+    MICROSOFT_TAGS, STREAMING_TAGS,
     flatten_requested_tags,
     merge_tag_rules,
     parse_dlc_plain,
@@ -224,7 +224,7 @@ class MergeTagRulesTests(unittest.TestCase):
 
     def test_streaming_tags_cover_expected_services(self):
         for service in ("netease", "bilibili", "iqiyi", "youku", "tencent"):
-            self.assertIn(service, STREAMING_TAGS)
+            self.assertIn(service, STREAMING_TAGS); assert all(s in MICROSOFT_TAGS for s in ("microsoft", "azure", "bing", "onedrive", "xbox"))
 
 
 if __name__ == "__main__":
