@@ -7,7 +7,14 @@ from unittest.mock import patch
 
 import yaml
 
-from main import parse_dlc_plain, parse_gfwlist_text, release_quanx_file
+from main import (
+    STREAMING_TAGS,
+    flatten_requested_tags,
+    merge_tag_rules,
+    parse_dlc_plain,
+    parse_gfwlist_text,
+    release_quanx_file,
+)
 
 
 class ParseDLCTests(unittest.TestCase):
@@ -160,6 +167,64 @@ plain.example
             output,
             "host, exact.example, proxy\nhost-suffix, suffix.example, proxy\n",
         )
+
+
+class MergeTagRulesTests(unittest.TestCase):
+    def _upstream_rules(self):
+        source = {
+            "lists": [
+                {
+                    "name": "netease",
+                    "rules": ["domain:163.com", "domain:126.net"],
+                },
+                {
+                    "name": "bilibili",
+                    "rules": ["domain:bilibili.com", "keyword:bilivideo"],
+                },
+                {"name": "category-ads-all", "rules": []},
+            ]
+        }
+        with patch(
+            "main.urlopen",
+            return_value=BytesIO(yaml.safe_dump(source).encode()),
+        ):
+            return parse_dlc_plain(
+                "fixture", ("netease", "bilibili", "category-ads-all")
+            )
+
+    def test_merges_multiple_upstream_tags_into_one_output(self):
+        rules = self._upstream_rules()
+        domain, domain_suffix, domain_keyword, domain_regex = merge_tag_rules(
+            rules, ("netease", "bilibili"), ("extra.example",), ("extra-suffix.example",)
+        )
+        self.assertEqual(domain, ["extra.example"])
+        self.assertEqual(
+            domain_suffix,
+            ["163.com", "126.net", "bilibili.com", "extra-suffix.example"],
+        )
+        self.assertEqual(domain_keyword, ["bilivideo"])
+        self.assertEqual(domain_regex, [])
+
+    def test_single_tag_still_works(self):
+        rules = self._upstream_rules()
+        self.assertEqual(
+            merge_tag_rules(rules, "netease"),
+            ([], ["163.com", "126.net"], [], []),
+        )
+
+    def test_flatten_requested_tags_expands_merged_entries(self):
+        rule_tags = (
+            ("category-ads-all", "reject", (), ()),
+            (("netease", "bilibili"), "streaming", (), ()),
+        )
+        self.assertEqual(
+            flatten_requested_tags(rule_tags),
+            ("category-ads-all", "netease", "bilibili"),
+        )
+
+    def test_streaming_tags_cover_expected_services(self):
+        for service in ("netease", "bilibili", "iqiyi", "youku", "tencent"):
+            self.assertIn(service, STREAMING_TAGS)
 
 
 if __name__ == "__main__":
