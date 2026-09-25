@@ -1,4 +1,3 @@
-
 >   Automatically generate and publish domain rules for Clash, Surge, Quantumult X, sing-box, and V2Ray GeoSite.
 
 > ## Rules
@@ -6,13 +5,14 @@
 > The rule data comes from
 > [`v2fly/domain-list-community`](https://github.com/v2fly/domain-list-community)'s
 > published `dlc.dat_plain.yml`, together with the plain-text rules from the official
-> [`gfwlist/gfwlist`](https://github.com/gfwlist/gfwlist). The following five tags are generated:
+> [`gfwlist/gfwlist`](https://github.com/gfwlist/gfwlist). The following tags are generated:
 
 > - `reject`: Combines `category-ads-all`, rules with the `@ads` attribute from all lists, and manually maintained blocking rules
 > - `gfw`: Proxy domains from the official GFWList
 > - `gfw-skip`: GFWList whitelist entries and additional direct-connection domains
 > - `loc-!cn`: Domains outside mainland China
 > - `loc-cn`: Direct-connection rules for mainland China, combining `geolocation-cn`, rules with the `@cn` attribute from all lists, and manually maintained direct-connection rules
+> - `streaming`: Mainland China streaming and entertainment services (NetEase Cloud Music, Bilibili, iQIYI, Youku, Tencent Video, Douyin, Kuaishou, Ximalaya, Kugou, Kuwo), intended for 回国-style routing
 
 > The upstream `domain-list-community` file already includes rule expansion, attribute filtering, and deduplication.
 
