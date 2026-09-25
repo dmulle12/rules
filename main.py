@@ -56,7 +56,7 @@ DIRECT_DOMAIN_SUFFIX = (
     "baozicdn.com",
 )
 
-# Manually maintained US school domains (no suitable upstream category).
+# Manually maintained US school domains, merged into the "microsoft" tag.
 US_EDU_DOMAIN_SUFFIX = (
     "jjc.edu",  # Joliet Junior College
     "lanecc.edu",  # Lane Community College
@@ -522,8 +522,7 @@ def _run() -> None:
         ("geolocation-!cn", "loc-!cn", (), ()),
         ("geolocation-cn", "loc-cn", DIRECT_DOMAIN, DIRECT_DOMAIN_SUFFIX),
         (STREAMING_TAGS, "streaming-cn", (), ()),
-        (MICROSOFT_TAGS, "microsoft", (), ()),
-        ((), "us-edu", (), US_EDU_DOMAIN_SUFFIX),
+        (MICROSOFT_TAGS, "microsoft", (), US_EDU_DOMAIN_SUFFIX),
     )
     upstream_rules = parse_dlc_plain(
         "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat_plain.yml",
