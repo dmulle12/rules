@@ -8,7 +8,7 @@ from unittest.mock import patch
 import yaml
 
 from main import (
-    MICROSOFT_TAGS, STREAMING_TAGS,
+    MICROSOFT_TAGS, STREAMING_TAGS, US_EDU_DOMAIN_SUFFIX,
     flatten_requested_tags,
     merge_tag_rules,
     parse_dlc_plain,
@@ -224,7 +224,18 @@ class MergeTagRulesTests(unittest.TestCase):
 
     def test_streaming_tags_cover_expected_services(self):
         for service in ("netease", "bilibili", "iqiyi", "youku", "tencent"):
-            self.assertIn(service, STREAMING_TAGS); assert all(s in MICROSOFT_TAGS for s in ("microsoft", "azure", "bing", "onedrive", "xbox"))
+            self.assertIn(service, STREAMING_TAGS)
+        assert all(s in MICROSOFT_TAGS for s in ("microsoft", "azure", "bing", "onedrive", "xbox"))
+
+    def test_us_edu_covers_expected_schools(self):
+        self.assertIn("jjc.edu", US_EDU_DOMAIN_SUFFIX)
+        self.assertIn("lanecc.edu", US_EDU_DOMAIN_SUFFIX)
+
+    def test_manual_only_entry_merges_without_upstream(self):
+        domains, suffixes, _, _ = merge_tag_rules({}, (), (), US_EDU_DOMAIN_SUFFIX)
+        self.assertEqual(domains, [])
+        self.assertIn("jjc.edu", suffixes)
+        self.assertIn("lanecc.edu", suffixes)
 
 
 if __name__ == "__main__":
