@@ -215,7 +215,7 @@ class MergeTagRulesTests(unittest.TestCase):
     def test_flatten_requested_tags_expands_merged_entries(self):
         rule_tags = (
             ("category-ads-all", "reject", (), ()),
-            (("netease", "bilibili"), "streaming", (), ()),
+            (("netease", "bilibili"), "streaming-cn", (), ()),
         )
         self.assertEqual(
             flatten_requested_tags(rule_tags),
