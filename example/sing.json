@@ -114,7 +114,7 @@
       {
         "type": "remote",
         "tag": "domestic",
-        "url": "https://gh-proxy.org/https://github.com/lauyv/rdat/raw/rel/loc-cn.srs",
+        "url": "https://gh-proxy.org/https://github.com/dmulle12/rules/raw/rel/loc-cn.srs",
         "update_interval": "6h0m0s"
       },
       {
