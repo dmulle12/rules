@@ -1,0 +1,11 @@
+[project]
+name = "rdat"
+version = "0.1.0"
+description = "Automated proxy rules for Clash, Surge, Quantumult X, sing-box, and V2Ray GeoSite"
+requires-python = ">=3.12"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+generate = "main:main"

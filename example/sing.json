@@ -1,0 +1,151 @@
+{
+  "$schema": "https://sing-box.sagernet.org/schema.json",
+  "log": {
+    "level": "warn"
+  },
+  "dns": {
+    "servers": [
+      {
+        "type": "quic",
+        "tag": "dns_encrypt",
+        "domain_resolver": "dns_local",
+        "server": "dns.alidns.com"
+      },
+      {
+        "type": "udp",
+        "tag": "dns_local",
+        "server": "119.29.29.29"
+      },
+      {
+        "type": "fakeip",
+        "tag": "dns_fakeip",
+        "inet4_range": "198.18.0.0/15",
+        "inet6_range": "fc00::/18"
+      }
+    ],
+    "rules": [
+      {
+        "rule_set": "domestic",
+        "server": "dns_local"
+      },
+      {
+        "action": "evaluate",
+        "server": "dns_encrypt"
+      },
+      {
+        "rule_set": "geoip_cn",
+        "match_response": true,
+        "action": "respond"
+      },
+      {
+        "match_response": true,
+        "ip_accept_any": true,
+        "invert": true,
+        "action": "respond"
+      },
+      {
+        "query_type": ["A", "AAAA"],
+        "server": "dns_fakeip",
+        "rewrite_ttl": 1
+      }
+    ],
+    "strategy": "prefer_ipv4",
+    "optimistic": true
+  },
+  "http_clients": [
+    {
+      "tag": "http2",
+      "version": 2,
+      "stream_receive_window": 0,
+      "connection_receive_window": 0
+    }
+  ],
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "address": ["172.18.0.1/30", "fdfe:dcba:9876::1/126"],
+      "auto_route": true,
+      "auto_redirect": false,
+      "udp_timeout": "2m0s"
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct-out"
+    },
+    {
+      "type": "selector",
+      "tag": "select-out",
+      "outbounds": ["direct-out", "HK-1"],
+      "default": "direct-out",
+      "interrupt_exist_connections": true
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "port": 53,
+        "action": "hijack-dns"
+      },
+      {
+        "action": "sniff",
+        "sniffer": ["tls", "http", "quic", "bittorrent"]
+      },
+      {
+        "protocol": "bittorrent",
+        "outbound": "direct-out"
+      },
+      {
+        "rule_set": "domestic",
+        "outbound": "direct-out"
+      },
+      {
+        "rule_set": "geoip_cn",
+        "outbound": "direct-out"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct-out"
+      }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "domestic",
+        "url": "https://gh-proxy.org/https://github.com/lauyv/rdat/raw/rel/loc-cn.srs",
+        "update_interval": "6h0m0s"
+      },
+      {
+        "type": "remote",
+        "tag": "geoip_cn",
+        "url": "https://gh-proxy.org/https://github.com/lauyv/cnip/raw/rel/chnroutes.srs",
+        "update_interval": "6h0m0s"
+      }
+    ],
+    "final": "select-out",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "dns_encrypt"
+  },
+  "services": [
+    {
+      "type": "api",
+      "tag": "sing-box-api",
+      "listen": "127.0.0.1",
+      "listen_port": 9090,
+      "access_control_allow_private_network": true,
+      "dashboard": {
+        "enabled": true,
+        "path": "zashboard",
+        "download_url": "https://gh-proxy.org/https://github.com/Zephyruso/zashboard/releases/download/v3.22.0/dist-cdn-fonts.zip"
+      }
+    }
+  ],
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "store_dns": true
+    }
+  }
+}

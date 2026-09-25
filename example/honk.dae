@@ -1,0 +1,54 @@
+# config see more at https://github.com/daeuniverse/dae/blob/main/example.dae
+# dscp see more at https://github.com/daeuniverse/dae/discussions/295
+
+global {
+  log_level: info
+  # if u not using dns bind, set dial_mode to domain++ prefer
+  dial_mode: domain
+  disable_waiting_network: false
+  wan_interface: auto
+  lan_interface: br-lan
+  tcp_check_url: 'http://cp.cloudflare.com'
+  udp_check_dns: '8.8.8.8'
+  check_interval: 30s
+  check_tolerance: 10ms
+  sniffing_timeout: 30ms
+}
+
+group {
+  proxy {
+    policy: min_moving_avg
+  }
+}
+
+node {
+  socks5: 'socks5://127.0.0.1:7000'
+}
+
+subscription {
+  # Fill in your subscription links here.
+  my_sub: 'https://www.example.com/subscription/link'
+}
+
+dns {
+  ipversion_prefer: 4
+  upstream {
+    localdns: 'udp://223.5.5.5'
+    encryptdns: 'quic://dns.alidns.com'
+  }
+  routing {
+    request {
+      qname(geosite:loc-cn) -> localdns
+      fallback: encryptdns
+    }
+  }
+}
+
+routing {
+  pname(NetworkManager, systemd-resolved, dnsmasq) -> must_direct
+  dscp(0x4) -> direct
+  domain(geosite:loc-cn) -> direct
+  dip(geoip:cn) -> direct
+  dip(geoip:lan) -> direct
+  fallback: proxy
+}

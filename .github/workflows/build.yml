@@ -1,0 +1,51 @@
+name: Build Rules
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: publish-rules
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install sing-box
+        run: bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+
+      - name: Generate rules
+        run: |
+          sing-box version
+          uv run python main.py
+
+      - name: Add maintained rules
+        run: |
+          mkdir -p dist/ext
+          cp source/* dist/ext/
+
+      - name: Publish rel branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git -C dist init --initial-branch=rel
+          git -C dist config user.name "github-actions[bot]"
+          git -C dist config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C dist add .
+          git -C dist commit -m "$(date -u +%Y%m%d%H%M)"
+          git -C dist remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git -C dist push --force origin rel
