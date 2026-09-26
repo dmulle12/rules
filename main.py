@@ -518,11 +518,11 @@ def main() -> None:
 
 def _run() -> None:
     rule_tags = (
-        ("category-ads-all", "reject", (), BLOCK_DOMAIN_SUFFIX),
-        ("geolocation-!cn", "loc-!cn", (), ()),
-        ("geolocation-cn", "loc-cn", DIRECT_DOMAIN, DIRECT_DOMAIN_SUFFIX),
-        (STREAMING_TAGS, "streaming-cn", (), ()),
-        (MICROSOFT_TAGS, "microsoft", (), US_EDU_DOMAIN_SUFFIX),
+        ("category-ads-all", "reject", (), BLOCK_DOMAIN_SUFFIX, "reject"),
+        ("geolocation-!cn", "loc-!cn", (), (), "proxy"),
+        ("geolocation-cn", "loc-cn", DIRECT_DOMAIN, DIRECT_DOMAIN_SUFFIX, "direct"),
+        (STREAMING_TAGS, "streaming-cn", (), (), "direct"),
+        (MICROSOFT_TAGS, "microsoft", (), US_EDU_DOMAIN_SUFFIX, "direct"),
     )
     upstream_rules = parse_dlc_plain(
         "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat_plain.yml",
@@ -530,12 +530,13 @@ def _run() -> None:
     )
 
     geosite_rules: GeoSiteRules = {}
-    for upstream_tag, output_tag, extra_domains, extra_suffixes in rule_tags:
+    for upstream_tag, output_tag, extra_domains, extra_suffixes, quanx_policy in rule_tags:
         geosite_rules[output_tag] = release(
             *merge_tag_rules(
                 upstream_rules, upstream_tag, extra_domains, extra_suffixes
             ),
             output_tag,
+            quanx_policy=quanx_policy,
         )
 
     gfwlist_rules = parse_gfwlist(
