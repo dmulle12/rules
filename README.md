@@ -33,6 +33,7 @@
 | `<tag>.list`      | Surge Domain Set                                   |
 | `<tag>.quanx`     | Quantumult X Filter                                |
 | `<tag>.srs`       | sing-box Binary Rule Set                           |
+| `chnroutes.mmdb`  | MaxMind-format China IP database for Surge `geoip-maxmind-url` |
 | `geosite.dat`     | V2Ray GeoSite containing `reject`, `loc-!cn`, and `loc-cn` |
 | `geosite-cn.dat`  | V2Ray GeoSite containing `loc-cn`                 |
 | `geosite-gfw.dat` | V2Ray GeoSite containing `gfw` and `gfw-skip`     |
@@ -53,11 +54,20 @@ https://github.com/dmulle12/rules/raw/rel/ext/bili.quanx
 https://github.com/dmulle12/rules/raw/rel/ext/bili.sgmodule
 ```
 
+> Surge GEOIP database (updated daily from
+> [`Loyalsoldier/geoip`](https://github.com/Loyalsoldier/geoip)):
+
+```ini
+[General]
+geoip-maxmind-url = https://github.com/dmulle12/rules/raw/rel/chnroutes.mmdb
+```
+
 ## Project Structure
 
 ```text
 .
 ├── main.py                    # Rule generator
+├── tools/mmdb/                # chnroutes.mmdb builder (Go, MaxMind format)
 ├── source/                    # Manually maintained rewrite rules and modules
 ├── js/                        # JavaScript scripts
 ├── example/                   # Client configuration examples
