@@ -33,6 +33,19 @@ jobs:
           sing-box version
           uv run python main.py
 
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: stable
+
+      - name: Build chnroutes.mmdb
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/Loyalsoldier/geoip/release/text/cn.txt -o /tmp/cn.txt
+          test -s /tmp/cn.txt
+          go -C tools/mmdb build -o /tmp/mmdb-build .
+          /tmp/mmdb-build /tmp/cn.txt dist/chnroutes.mmdb
+          test -s dist/chnroutes.mmdb
+
       - name: Add maintained rules
         run: |
           mkdir -p dist/ext
