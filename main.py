@@ -62,6 +62,13 @@ US_EDU_DOMAIN_SUFFIX = (
     "lanecc.edu",  # Lane Community College
 )
 
+# Manually maintained extra domains for the "douyin" tag. snssdk.com is the
+# shared ByteDance SDK domain (used by both Douyin and TikTok) and is not part
+# of the upstream "douyin" category.
+DOUYIN_EXTRA_SUFFIX = (
+    "snssdk.com",
+)
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Logging
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -522,6 +529,7 @@ def _run() -> None:
         ("geolocation-!cn", "loc-!cn", (), (), "proxy"),
         ("geolocation-cn", "loc-cn", DIRECT_DOMAIN, DIRECT_DOMAIN_SUFFIX, "direct"),
         (STREAMING_TAGS, "streaming-cn", (), (), "direct"),
+        ("douyin", "douyin", (), DOUYIN_EXTRA_SUFFIX, "direct"),
         (MICROSOFT_TAGS, "microsoft", (), US_EDU_DOMAIN_SUFFIX, "direct"),
     )
     upstream_rules = parse_dlc_plain(
