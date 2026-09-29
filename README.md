@@ -3,9 +3,9 @@
 > ## Rules
 
 > The rule data comes from
-> [`v2fly/domain-list-community`](https://github.com/v2fly/domain-list-community)'s
+> [`v2fly/domain-list-community`](https://github.com/v2fly/domain-list-community) (MIT)'s
 > published `dlc.dat_plain.yml`, together with the plain-text rules from the official
-> [`gfwlist/gfwlist`](https://github.com/gfwlist/gfwlist). The following tags are generated:
+> [`gfwlist/gfwlist`](https://github.com/gfwlist/gfwlist) (LGPL-2.1). The following tags are generated:
 
 > - `reject`: Combines `category-ads-all`, rules with the `@ads` attribute from all lists, and manually maintained blocking rules
 > - `gfw`: Proxy domains from the official GFWList
@@ -55,8 +55,8 @@ https://github.com/dmulle12/rules/raw/rel/ext/bili.quanx
 https://github.com/dmulle12/rules/raw/rel/ext/bili.sgmodule
 ```
 
-> Surge GEOIP database (updated daily from
-> [`Loyalsoldier/geoip`](https://github.com/Loyalsoldier/geoip)):
+> Surge GEOIP database (built daily from [`Loyalsoldier/geoip`](https://github.com/Loyalsoldier/geoip)'s
+> `cn.txt`, [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/)):
 
 ```ini
 [General]
