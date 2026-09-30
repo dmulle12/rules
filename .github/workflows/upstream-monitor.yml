@@ -1,0 +1,74 @@
+# ============================================================
+# 上游规则源监控
+# ------------------------------------------------------------
+# 每天定时用 Firecrawl 抓取 v2fly 上游的分类文件，
+# 对比内容指纹，发现"上游更新了"就自动开 Issue 提醒你。
+#
+# 给新手看的设计说明：
+# 1. 本文件完全独立，不碰 build.yml 的每日构建逻辑；
+# 2. 所有密钥走 Secrets，绝不写进仓库文件；
+# 3. 想改监控目标，只改 .github/upstream-monitor/targets.json，
+#    不用动这个文件。
+# ============================================================
+
+name: 上游规则源监控
+
+on:
+  schedule:
+    # 每天 UTC 03:00 跑一次（北京时间 11:00）。
+    # cron 写法：分 时 日 月 周。
+    # 注意：定时任务只在合进 main 分支后生效，
+    # 在 PR 分支上它不会自动跑——想提前验证用下面的手动触发。
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    # 允许在仓库 Actions 页面手动点 "Run workflow" 触发，
+    # 调试、验证、带练都靠它。
+
+permissions:
+  contents: write  # 指纹变了要提交 hashes.json，需要写权限
+  issues: write    # 有更新要自动开 Issue 提醒，需要写权限
+
+jobs:
+  check-upstream:
+    name: 检查上游是否有更新
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 运行上游检查脚本
+        id: check
+        env:
+          # ${{ secrets.XXX }} 是读取仓库 Secrets 的固定写法，
+          # 真实值只存在 GitHub 服务器上，日志里会被自动打码。
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+        run: python3 .github/scripts/upstream_check.py
+
+      - name: 上传检查报告
+        # always() 表示不管上一步成功失败都执行：
+        # 失败时的报告，正是排错时要看的东西。
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-report
+          path: .github/upstream-monitor/report.md
+
+      - name: 提交更新后的指纹文件
+        # 只有"确实有更新"或"第一次建基线"时才提交，
+        # 没变化的日子这个步骤会直接跳过（显示灰色）。
+        if: steps.check.outputs.changed == 'true' || steps.check.outputs.baseline == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/upstream-monitor/hashes.json
+          git commit -m "chore: 更新上游规则源指纹"
+          git push
+
+      - name: 有更新时开 Issue 提醒
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "上游规则源有更新（$(date +%F)）" \
+            --body-file .github/upstream-monitor/report.md
