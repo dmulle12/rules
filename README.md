@@ -1,91 +1,85 @@
->   Automatically generate and publish domain rules for Clash, Surge, Quantumult X, sing-box, and V2Ray GeoSite.
+# rules
 
-> ## Rules
+每天自动构建的代理分流规则集，Surge / Clash / Quantumult X / sing-box / V2Ray 全格式开箱即用。
 
-> The rule data comes from
-> [`v2fly/domain-list-community`](https://github.com/v2fly/domain-list-community) (MIT)'s
-> published `dlc.dat_plain.yml`, together with the plain-text rules from the official
-> [`gfwlist/gfwlist`](https://github.com/gfwlist/gfwlist) (LGPL-2.1). The following tags are generated:
+[![Build Rules](https://github.com/dmulle12/rules/actions/workflows/build.yml/badge.svg)](https://github.com/dmulle12/rules/actions/workflows/build.yml)
+[![上游规则源监控](https://github.com/dmulle12/rules/actions/workflows/upstream-monitor.yml/badge.svg)](https://github.com/dmulle12/rules/actions/workflows/upstream-monitor.yml)
 
-> - `reject`: Combines `category-ads-all`, rules with the `@ads` attribute from all lists, and manually maintained blocking rules
-> - `gfw`: Proxy domains from the official GFWList
-> - `gfw-skip`: GFWList whitelist entries and additional direct-connection domains
-> - `loc-!cn`: Domains outside mainland China
-> - `loc-cn`: Direct-connection rules for mainland China, combining `geolocation-cn`, rules with the `@cn` attribute from all lists, and manually maintained direct-connection rules
-> - `streaming-cn`: Mainland China streaming and entertainment services (NetEase Cloud Music, Bilibili, iQIYI, Youku, Tencent Video, Douyin, Kuaishou, Ximalaya, Kugou, Kuwo), intended for 回国-style routing
-> - `douyin`: Douyin (Chinese TikTok) domains plus the shared ByteDance SDK domain (`snssdk.com`), intended for routing via a dedicated 回国 node/policy
-> - `microsoft`: Microsoft services (Microsoft 365/Office, Outlook, OneDrive, Xbox, Azure, Bing) plus US school domains (Joliet Junior College: jjc.edu, Lane Community College: lanecc.edu), intended for routing via US nodes
+## 30 秒上手
 
-> The upstream `domain-list-community` file already includes rule expansion, attribute filtering, and deduplication.
+每天自动构建，订阅一次就行，链接永久有效。把 `streaming-cn` 换成下表任意 tag 即可：
 
-> URLs and wildcard rules in the GFWList are converted into domain rules, while whitelist exceptions are written separately to `gfw-skip`.
-
-> This project extracts, supplements, and converts the rules into formats supported by various clients.
-
-> `@cn` and `@ads` are matched by their complete attribute names. Other attributes such as `@!cn` and `@!ads` are not included. Rules are deduplicated after merging. The `@cn` attribute does not guarantee that a server is located inside mainland China. Rules containing both `@cn` and `@ads` are included in both corresponding tags.
-
-## Releases
-
-> GitHub Actions builds the rules once a day and automatically builds them whenever `main` is updated. Build artifacts are published to the `rel` branch; that branch is rebuilt on every release and retains only the latest results.
-
-| Path              | Format                                             |
-| ----------------- | -------------------------------------------------- |
-| `<tag>.yaml`      | Clash Rule Provider                                |
-| `<tag>.list`      | Surge Domain Set                                   |
-| `<tag>.quanx`     | Quantumult X Filter                                |
-| `<tag>.srs`       | sing-box Binary Rule Set                           |
-| `chnroutes.mmdb`  | MaxMind-format China IP database for Surge `geoip-maxmind-url` |
-| `geosite.dat`     | V2Ray GeoSite containing `reject`, `loc-!cn`, and `loc-cn` |
-| `geosite-cn.dat`  | V2Ray GeoSite containing `loc-cn`                 |
-| `geosite-gfw.dat` | V2Ray GeoSite containing `gfw` and `gfw-skip`     |
-| `ext/*.quanx`     | Quantumult X Rewrite Rules                         |
-| `ext/*.sgmodule`  | Surge Modules                                      |
-
-> Download URL format:
+**Surge**（RULE-SET / DOMAIN-SET）
 
 ```text
-https://github.com/dmulle12/rules/raw/rel/<file>
+https://github.com/dmulle12/rules/raw/rel/streaming-cn.list
 ```
 
-> Examples:
+**Clash**（Rule Provider）
+
+```yaml
+rule-providers:
+  streaming-cn:
+    type: http
+    behavior: domain
+    url: https://github.com/dmulle12/rules/raw/rel/streaming-cn.yaml
+    path: ./ruleset/streaming-cn.yaml
+    interval: 86400
+```
+
+**Quantumult X**（Filter）
 
 ```text
-https://github.com/dmulle12/rules/raw/rel/loc-cn.srs
-https://github.com/dmulle12/rules/raw/rel/ext/bili.quanx
-https://github.com/dmulle12/rules/raw/rel/ext/bili.sgmodule
+https://github.com/dmulle12/rules/raw/rel/streaming-cn.quanx
 ```
 
-> Surge GEOIP database (built daily from [`Loyalsoldier/geoip`](https://github.com/Loyalsoldier/geoip)'s
-> `cn.txt`, [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/)):
+**sing-box**（Rule Set）
+
+```text
+https://github.com/dmulle12/rules/raw/rel/streaming-cn.srs
+```
+
+## 规则 tag 一览
+
+| Tag | 内容 | 典型用途 |
+|-----|------|----------|
+| `streaming-cn` | 大陆流媒体：网易云、 B 站、爱奇艺、优酷、腾讯视频、抖音、快手、喜马拉雅、酷狗、酷我 | 回国节点分流 |
+| `douyin` | 抖音域名 + ByteDance 公共 SDK 域名（`snssdk.com`） | 抖音走独立节点 |
+| `loc-cn` | 大陆直连域名（`geolocation-cn` + 全量 `@cn` 属性规则 + 手工补充） | 直连 / 回国 |
+| `microsoft` | 微软全家桶（M365 / Outlook / OneDrive / Xbox / Azure / Bing）+ 美国学校域名 | 美国节点 |
+| `reject` | 去广告（含 `@ads` 属性规则 + 手工维护） | 全客户端 |
+| `gfw` / `gfw-skip` | GFWList 需代理域名 / 白名单直连域名 | 代理分流 |
+| `loc-!cn` | 非大陆域名 | 海外直连分流 |
+
+每种 tag 提供 4 种格式：`.yaml`（Clash）、`.list`（Surge）、`.quanx`（Quantumult X）、`.srs`（sing-box）。
+另有 V2Ray `geosite.dat` 系列与 Surge 专用中国 IP 库 `chnroutes.mmdb`（配合 `GEOIP,CN` 使用）：
 
 ```ini
 [General]
 geoip-maxmind-url = https://github.com/dmulle12/rules/raw/rel/chnroutes.mmdb
 ```
 
-## Project Structure
+`source/` 下还有自维护的去广告 Rewrite（`ext/*.quanx`）与 Surge 模块（`ext/*.sgmodule`），如 B 站去广告。
 
-```text
-.
-├── main.py                    # Rule generator
-├── tools/mmdb/                # chnroutes.mmdb builder (Go, MaxMind format)
-├── source/                    # Manually maintained rewrite rules and modules
-├── js/                        # JavaScript scripts
-├── example/                   # Client configuration examples
-├── tests/                     # Rule parsing tests
-├── .github/workflows/build.yml
-├── pyproject.toml
-└── uv.lock
-```
+## 自动构建
 
-## Local Build
+- GitHub Actions 每天构建一次，`main` 分支有更新时也会触发，产物发布到 `rel` 分支（只保留最新版）。
+- 上游数据源（`v2fly/domain-list-community` 各分类）每天做指纹监控，变化自动开 Issue 提醒跟进。
 
-> Requires Python 3.12, [uv](https://docs.astral.sh/uv/), and
-> [sing-box](https://sing-box.sagernet.org/).
+## 数据来源（致谢）
+
+- [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community)（MIT）—— 规则数据源
+- [gfwlist/gfwlist](https://github.com/gfwlist/gfwlist)（LGPL-2.1）—— GFWList 数据源
+- [Loyalsoldier/geoip](https://github.com/Loyalsoldier/geoip)（CC-BY-SA-4.0）—— 中国 IP 数据
+
+## 本地构建
+
+需要 Python 3.12、[uv](https://docs.astral.sh/uv/) 与 [sing-box](https://sing-box.sagernet.org/)：
 
 ```bash
 uv sync
 uv run python main.py
 ```
 
-> Build artifacts are generated in `dist/`.
+产物生成在 `dist/`。
+
