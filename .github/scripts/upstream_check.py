@@ -31,7 +31,9 @@ REPORT_FILE = os.path.join(MONITOR_DIR, "report.md")
 
 FIRECRAWL_API = "https://api.firecrawl.dev/v1/scrape"
 MAX_RETRIES = 2   # 每个目标失败时最多重试 2 次：过滤网络抖动造成的误报
-SLEEP_BETWEEN = 2  # 目标之间歇 2 秒，对 GitHub raw 客气一点
+SLEEP_BETWEEN = 6  # 目标之间歇 6 秒：Firecrawl 免费档约每分钟限流 20 次，
+                   # 歇太短会吃 429（2026-09-30 第一次运行已踩过坑）
+RETRY_429_WAIT = 30  # 吃到 429（限流）时重试前等待的基数：30 秒 × 第几次重试
 
 
 def log(msg):
@@ -84,7 +86,14 @@ def scrape(api_key, url):
         except Exception as e:  # noqa: BLE001 —— 监控脚本里单个目标失败要记下来、继续抓下一个
             last_err = e
             log("    第 %d 次尝试失败：%s" % (attempt, e))
-            time.sleep(3)
+            if "429" in str(e):
+                # 429 是 Firecrawl 的限流：硬撞只会被继续拦，
+                # 按 30 秒 × 次数退避等待，让配额恢复后再试
+                wait = RETRY_429_WAIT * attempt
+                log("    触发限流，等待 %d 秒后再试……" % wait)
+                time.sleep(wait)
+            else:
+                time.sleep(3)
     raise last_err
 
 
