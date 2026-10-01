@@ -69,6 +69,13 @@ DOUYIN_EXTRA_SUFFIX = (
     "snssdk.com",
 )
 
+# hagezi wildcard blocklists, used for the "ads" / "ads-mini" tags.
+# License: GPL-3.0 (https://github.com/hagezi/dns-blocklists/blob/main/LICENSE)
+HAGEZI_URLS = {
+    "ads": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.txt",
+    "ads-mini": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.mini.txt",
+}
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Logging
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -269,6 +276,41 @@ def parse_gfwlist(url: str) -> GeoSiteRules:
     log.info("Downloading %s", url)
     with urlopen(url) as response:
         return parse_gfwlist_text(response.read())
+
+
+def parse_hagezi_wildcard_text(content: bytes) -> DomainResult:
+    """Convert a hagezi wildcard blocklist into domain-suffix rules.
+
+    Entries are `*.domain` items separated by commas and/or newlines, with `#`
+    comment lines. The wildcard prefix is stripped because every supported
+    output format treats the remainder as a suffix match (Surge `.domain`,
+    Clash `+.domain`, QuanX `host-suffix`, sing-box `domain_suffix`).
+    """
+    try:
+        text = content.decode()
+    except UnicodeDecodeError as error:
+        raise ValueError("Invalid UTF-8 hagezi list") from error
+
+    domain_suffix: list[str] = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        for chunk in line.split(","):
+            entry = chunk.strip().removeprefix("*.").lower().strip(".")
+            if not entry or entry.startswith("#"):
+                continue
+            domain_suffix.append(entry)
+
+    log.info("Parsed hagezi list: %d suffixes", len(domain_suffix))
+    return [], domain_suffix, [], []
+
+
+def parse_hagezi_wildcard(url: str) -> DomainResult:
+    """Download and parse a hagezi wildcard blocklist."""
+    log.info("Downloading %s", url)
+    with urlopen(url) as response:
+        return parse_hagezi_wildcard_text(response.read())
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -555,6 +597,11 @@ def _run() -> None:
     for tag, quanx_policy in (("gfw", "proxy"), ("gfw-skip", "direct")):
         gfwlist_rules[tag] = release(
             *gfwlist_rules[tag], tag, quanx_policy=quanx_policy
+        )
+
+    for tag in ("ads", "ads-mini"):
+        release(
+            *parse_hagezi_wildcard(HAGEZI_URLS[tag]), tag, quanx_policy="reject"
         )
 
     release_geosite_files(geosite_rules, gfwlist_rules)
