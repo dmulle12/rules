@@ -13,6 +13,7 @@ from main import (
     merge_tag_rules,
     parse_dlc_plain,
     parse_gfwlist_text,
+    parse_hagezi_wildcard_text,
     release_quanx_file,
 )
 
@@ -236,6 +237,25 @@ class MergeTagRulesTests(unittest.TestCase):
         self.assertEqual(domains, [])
         self.assertIn("jjc.edu", suffixes)
         self.assertIn("lanecc.edu", suffixes)
+
+    def test_hagezi_wildcard_text_strips_prefix_and_comments(self):
+        content = (
+            "# Title: test list\n"
+            "*.ads.example,*.tracker.example\n"
+            "*.metrics.example\n"
+            "# a trailing comment\n"
+        ).encode()
+        domains, suffixes, keywords, regexes = parse_hagezi_wildcard_text(content)
+        self.assertEqual(domains, [])
+        self.assertEqual(keywords, [])
+        self.assertEqual(regexes, [])
+        self.assertEqual(
+            suffixes, ["ads.example", "tracker.example", "metrics.example"]
+        )
+
+    def test_hagezi_wildcard_text_skips_empty_entries(self):
+        _, suffixes, _, _ = parse_hagezi_wildcard_text(b"*.\n*.ads.example,,\n")
+        self.assertEqual(suffixes, ["ads.example"])
 
 
 if __name__ == "__main__":
