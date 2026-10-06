@@ -117,13 +117,14 @@ MICROSOFT_TAGS = (
     "onedrive",
     "xbox",
 )
+# NOTE: the upstream "douyin" category is intentionally excluded here — it ships
+# as the dedicated "douyin" tag instead, so Douyin domains live in exactly one list.
 STREAMING_TAGS = (
     "netease",
     "bilibili",
     "iqiyi",
     "youku",
     "tencent",
-    "douyin",
     "kuaishou",
     "ximalaya",
     "kugou",
