@@ -54,6 +54,13 @@
 | `ext/*.quanx`     | Quantumult X Rewrite Rules                         |
 | `ext/*.sgmodule`  | Surge Modules                                      |
 
+> ⚠️ Do **not** overwrite your client's official `geosite.dat` with the one above.
+> It only contains the 6 custom tags listed; Xray treats a routing rule that
+> references a missing tag (e.g. the built-in `geosite:cn`) as a hard startup
+> error and the core will refuse to start. Instead, save it under a different
+> name (e.g. `geosite-dmulle12.dat`) next to the official file and reference
+> tags as `geosite:<tag>@geosite-dmulle12.dat`.
+
 > Download URL format:
 
 ```text
