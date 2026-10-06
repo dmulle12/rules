@@ -12,7 +12,7 @@
 > - `gfw-skip`: GFWList whitelist entries and additional direct-connection domains
 > - `loc-!cn`: Domains outside mainland China
 > - `loc-cn`: Direct-connection rules for mainland China, combining `geolocation-cn`, rules with the `@cn` attribute from all lists, and manually maintained direct-connection rules
-> - `streaming-cn`: Mainland China streaming and entertainment services (NetEase Cloud Music, Bilibili, iQIYI, Youku, Tencent Video, Douyin, Kuaishou, Ximalaya, Kugou, Kuwo), intended for 回国-style routing
+> - `streaming-cn`: Mainland China streaming and entertainment services (NetEase Cloud Music, Bilibili, iQIYI, Youku, Tencent Video, Kuaishou, Ximalaya, Kugou, Kuwo), intended for 回国-style routing (Douyin now ships as the dedicated `douyin` tag)
 > - `douyin`: Douyin (Chinese TikTok) domains plus the shared ByteDance SDK domain (`snssdk.com`), intended for routing via a dedicated 回国 node/policy
 > - `microsoft`: Microsoft services (Microsoft 365/Office, Outlook, OneDrive, Xbox, Azure, Bing) plus US school domains (Joliet Junior College: jjc.edu, Lane Community College: lanecc.edu), intended for routing via US nodes
 > - `ads`: Ad/tracker blocklist converted from hagezi Multi PRO (`wildcard/pro.txt`, ~230k domains, recommended)
