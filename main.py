@@ -100,6 +100,9 @@ GEOSITE_TAGS = (
     "reject",
     "loc-!cn",
     "loc-cn",
+    "streaming-cn",
+    "microsoft",
+    "douyin",
 )
 
 GFWLIST_TAGS = ("gfw", "gfw-skip")
