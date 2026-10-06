@@ -48,7 +48,7 @@
 | `<tag>.quanx`     | Quantumult X Filter                                |
 | `<tag>.srs`       | sing-box Binary Rule Set                           |
 | `chnroutes.mmdb`  | MaxMind-format China IP database for Surge `geoip-maxmind-url` |
-| `geosite.dat`     | V2Ray GeoSite containing `reject`, `loc-!cn`, and `loc-cn` |
+| `geosite.dat`     | V2Ray GeoSite containing `reject`, `loc-!cn`, `loc-cn`, `streaming-cn`, `microsoft`, and `douyin` |
 | `geosite-cn.dat`  | V2Ray GeoSite containing `loc-cn`                 |
 | `geosite-gfw.dat` | V2Ray GeoSite containing `gfw` and `gfw-skip`     |
 | `ext/*.quanx`     | Quantumult X Rewrite Rules                         |
