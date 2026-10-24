@@ -1,0 +1,11 @@
+hostname = api.weibo.cn, api.weibo.com, weibointl.api.weibo.cn, weibointl.api.weibo.com, boot*.weibo.com, *.uve.weibo.com
+
+^https?:\/\/(sdk|wb)app\.uve\.weibo\.com\/(interface\/sdk\/sdkad\.php|wbapplua\/wbpullad\.lua) url reject-dict
+^https?:\/\/boot.*weibo\.com\/v\d\/ad\/realtime url reject-dict
+
+^https?:\/\/weibointl\.api\.weibo\.c(n|om)\/portal\.php.* url jsonjq-response-body '.data.display_ad = 1'
+^https?:\/\/boot.*weibo\.com\/v\d\/ad\/preload url jsonjq-response-body '.ads[] |= (.start_time += 864000 | .end_time += 864000 | .display_duration = 0 | .daily_display_cnt = 0 | .total_display_cnt = 0)'
+^https?:\/\/api\.weibo\.(cn|com)\/2\/(profile\/container_timeline|searchall) url jsonjq-response-body 'del(.items[] | select(.data.mblogtype != 0))'
+^https?:\/\/api\.weibo\.(cn|com)\/2\/statuses\/(friends_timeline|(friends\/timeline)) url jsonjq-response-body '.ad = [] | .advertises = [] | .ad_version_2_weibo = []'
+^https?:\/\/api\.weibo\.(cn|com)\/2\/ad\/weibointl url jsonjq-response-body '.data = []'
+^https?:\/\/api\.weibo\.(cn|com)\/2\/statuses\/extend url jsonjq-response-body '.head_cards = []'
