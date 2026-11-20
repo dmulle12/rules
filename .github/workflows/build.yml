@@ -26,7 +26,16 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Install sing-box
-        run: bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+        env:
+          SING_BOX_VERSION: "1.14.4"
+        run: |
+          set -euo pipefail
+          curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
+            -o sing-box.deb \
+            "https://github.com/SagerNet/sing-box/releases/download/v${SING_BOX_VERSION}/sing-box_${SING_BOX_VERSION}_linux_amd64.deb"
+          sudo dpkg -i sing-box.deb
+          rm sing-box.deb
+          sing-box version
 
       - name: Generate rules
         run: |
